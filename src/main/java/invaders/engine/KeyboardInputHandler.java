@@ -15,6 +15,12 @@ class KeyboardInputHandler {
     private final GameEngine model;
     private boolean left = false;
     private boolean right = false;
+
+    // Add in flags to indicate if a player has a projectile
+    // ------------------------------------------------------
+//    private Projectile playerProjectile; // Reference to the player's projectile
+//    private boolean playerProjectileOnScreen = false; // Flag to track if a player projectile is on screen
+
     private Set<KeyCode> pressedKeys = new HashSet<>();
 
     private Map<String, MediaPlayer> sounds = new HashMap<>();
@@ -37,6 +43,9 @@ class KeyboardInputHandler {
         }
         pressedKeys.add(keyEvent.getCode());
 
+
+        // Adjust the spacebar
+        // ------------------------------------------------------
         if (keyEvent.getCode().equals(KeyCode.SPACE)) {
             if (model.shootPressed()) {
                 MediaPlayer shoot = sounds.get("shoot");

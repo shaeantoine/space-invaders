@@ -1,5 +1,12 @@
 package invaders.config;
 
+import invaders.GameObject;
+import invaders.enemy.Enemy;
+import invaders.enemy.EnemyBuilder;
+import invaders.physics.Vector2D;
+import invaders.projectileStrategy.FastStraightStrategy;
+import invaders.projectileStrategy.ProjectileStrategy;
+import invaders.projectileStrategy.SlowDownwardStrategy;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -8,6 +15,8 @@ import org.json.simple.parser.ParseException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigReader {
 
@@ -18,25 +27,48 @@ public class ConfigReader {
 	 * 
 	 * @param path The path of the json file to read
 	 */
-	public static void parse(String path) {
+
+	public static List<Enemy> parse(String path) {
+		//Map<GameObject, Renderable> gameObjects = new HashMap<>();
+		List<Enemy> enemyGroup = new ArrayList<>();
+
+		List<GameObject> gameObjects = new ArrayList<>();
 
 		JSONParser parser = new JSONParser();
 		try {
 			Object object = parser.parse(new FileReader(path));
-
-			// convert Object to JSONObject
 			JSONObject jsonObject = (JSONObject) object;
 
-			// reading the Game section:
+			// Reading the Game:
 			JSONObject jsonGame = (JSONObject) jsonObject.get("Game");
-
-			// reading a coordinate from the nested section within the game
-			// note that the game x and y are of type Long (i.e. they are integers)
 			Long gameX = (Long) ((JSONObject) jsonGame.get("size")).get("x");
-			// TODO: Long gameY =
+			Long gameY = (Long) ((JSONObject) jsonGame.get("size")).get("y");
 
-			// TODO: delete me, this is just a demonstration:
-			System.out.println("Game details: x: " + gameX);
+			// Reading the player:
+			JSONObject jsonPlayer = (JSONObject) jsonObject.get("Player");
+			String playerColour = (String) jsonPlayer.get("colour");
+			Long playerSpeed = (Long) jsonPlayer.get("speed");
+			Long playerLives = (Long) jsonPlayer.get("lives");
+			Long playerX = (Long) ((JSONObject) jsonPlayer.get("position")).get("x");
+			Long playerY = (Long) ((JSONObject) jsonPlayer.get("position")).get("y");
+//			Player player = new Player();
+//			player.start((JSONObject) obj);
+//			gameObjects.add(player);
+
+			// Reading the bunkers:
+			JSONArray jsonBunkers = (JSONArray) jsonObject.get("Bunkers");
+
+			for (Object obj: jsonBunkers) {
+				JSONObject jsonBunker = (JSONObject) obj;
+
+				Long bunkerPositionX = (Long) ((JSONObject) jsonBunker.get("position")).get("x");
+				Long bunkerPositionY = (Long) ((JSONObject) jsonBunker.get("position")).get("y");
+				Long bunkerSizeX = (Long) ((JSONObject) jsonBunker.get("size")).get("x");
+				Long bunkerSizeY = (Long) ((JSONObject) jsonBunker.get("size")).get("y");
+	//			Bunker bunker = new Bunker();
+	//			bunker.start((JSONObject) obj);
+	//			gameObjects.add(bunker);
+			}
 
 			// reading the "Enemies" array:
 			JSONArray jsonEnemies = (JSONArray) jsonObject.get("Enemies");
@@ -45,15 +77,33 @@ public class ConfigReader {
 			for (Object obj : jsonEnemies) {
 				JSONObject jsonEnemy = (JSONObject) obj;
 				
-				// the enemy position is a double
-				Double positionX = (Double) ((JSONObject) jsonEnemy.get("position")).get("x");
-				// TODO: Double positionY =
+				// Enemy Attributes
+				Long positionX = (Long) ((JSONObject) jsonEnemy.get("position")).get("x");
+				Long positionY = (Long) ((JSONObject) jsonEnemy.get("position")).get("y");
+				String projectileType = (String) jsonEnemy.get("projectile");
 
-//
-//				String projectileStrategy = (Double) jsonEnemy.get("projectile");
-//
-//				// TODO: delete me, this is just a demonstration:
-//				System.out.println("Enemey x: " + positionX + ", projectile: " + projectileStrategy);
+				// Building enemies
+				ProjectileStrategy projectileStrategy;
+				if ("fast_straight".equals(projectileType)) {
+					projectileStrategy = new FastStraightStrategy();
+				} else if ("slow_straight".equals(projectileType)) {
+					projectileStrategy = new SlowDownwardStrategy();
+				} else {
+					throw new IllegalArgumentException("Unknown projectile type: " + projectileType);
+				}
+
+				Vector2D enemyPosition = new Vector2D(positionX, positionY);
+
+				// Create Enemy as a GameObject using the EnemyBuilder
+				Enemy enemy = new EnemyBuilder()
+						.withPosition(enemyPosition)
+						.withProjectileStrategy(projectileStrategy)
+						.build();
+
+				enemyGroup.add(enemy);
+
+				// TODO: delete me, this is just a demonstration:
+				// System.out.println("Enemey x: " + positionX + ", Enemey Y: " + positionY + ", projectile: " + projectileStrategy);
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -62,6 +112,10 @@ public class ConfigReader {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+
+		//return gameObjects;
+		return enemyGroup;
+
 	}
 
 	/**

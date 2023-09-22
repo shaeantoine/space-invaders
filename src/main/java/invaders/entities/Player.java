@@ -5,12 +5,18 @@ import invaders.physics.Moveable;
 import invaders.physics.Vector2D;
 import invaders.rendering.Animator;
 import invaders.rendering.Renderable;
+import invaders.projectileFactory.*;
 
 import javafx.scene.image.Image;
 
 import java.io.File;
 
 public class Player implements Moveable, Damagable, Renderable {
+
+    // TODO check these values
+    private Projectile playerProjectile; // Reference to the player's projectile
+    private boolean playerProjectileOnScreen = false; // Flag to track if a player projectile is on screen
+
 
     private final Vector2D position;
     private final Animator anim = null;
@@ -20,9 +26,22 @@ public class Player implements Moveable, Damagable, Renderable {
     private final double height = 30;
     private final Image image;
 
+    // TODO check this variable
+    private ProjectileFactory projectileFactory;
+
+//    public Player(Vector2D position, ProjectileFactory projectileFactory){
+//        this.image = new Image(new File("src/main/resources/player.png").toURI().toString(), width, height, true, true);
+//        this.position = position;
+//
+//        // TODO check this initializer
+//        this.projectileFactory = projectileFactory;
+//
+//    }
+
     public Player(Vector2D position){
         this.image = new Image(new File("src/main/resources/player.png").toURI().toString(), width, height, true, true);
         this.position = position;
+
     }
 
     @Override
@@ -60,8 +79,12 @@ public class Player implements Moveable, Damagable, Renderable {
         this.position.setX(this.position.getX() + 1);
     }
 
+    // Change the method structure
     public void shoot(){
-        // todo
+        // TODO check this initialization
+//        ProjectileFactory slowFactory = new SlowStraightFactory();
+//        Projectile playerProjectile = slowFactory.shootProjectile(getPosition());
+
     }
 
     @Override
